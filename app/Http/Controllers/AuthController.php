@@ -49,24 +49,26 @@ class AuthController extends Controller
            'email' => 'required|string|email',
            'password' => 'required|string',
        ]);
-
+   
        // Если валидация не прошла
        if ($validator->fails()) {
            return response()->json([
                'errors' => $validator->errors(),
            ], 422);
        }
-
+   
        // Аутентификация пользователя
        if (Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
            $user = Auth::user();
-
+           $token = $user->createToken('API Token')->plainTextToken;
+   
            return response()->json([
                'message' => 'Login successful',
                'user' => $user,
+               'token' => $token, // Возвращаем токен
            ], 200);
        }
-
+   
        // Если аутентификация не прошла
        return response()->json([
            'error' => 'Unauthorized',
