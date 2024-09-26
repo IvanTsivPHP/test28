@@ -38,7 +38,7 @@ class CarControllerTest extends TestCase
     protected function assertResponseStatusAndStructure($response, int $status)
     {
         $response->assertStatus($status);
-       
+
         $response->assertJsonStructure([
             'data' => [
                 'id',
@@ -75,7 +75,7 @@ class CarControllerTest extends TestCase
             ],
         ]);
     }
-    
+
 
     protected function getCarData(): array
     {
@@ -91,19 +91,19 @@ class CarControllerTest extends TestCase
     public function test_can_store_car_v1()
     {
         $carData = $this->getCarData();
-        
+
         $response = $this->postJson('/api/v1/cars', $carData, $this->headers);
         $this->assertResponseStatusAndStructure($response, 201);
         $this->assertCarInDatabase($carData);
         $this->assertResponseData($response, $carData);
- 
     }
 
-    public function test_can_validate_store_car_v1() {
+    public function test_can_validate_store_car_v1()
+    {
         $carData = $this->getCarData();
         $carData['brand_id'] = 'some string';
         $response = $this->postJson('/api/v1/cars', $carData, $this->headers);
-        
+
         $response->assertStatus(422);
 
         $response->assertJson([
@@ -113,7 +113,7 @@ class CarControllerTest extends TestCase
                     'The selected brand id is invalid.'
                 ]
             ]
-        ]);  
+        ]);
     }
 
     public function test_can_fetch_user_cars()
@@ -121,7 +121,7 @@ class CarControllerTest extends TestCase
         // Создаем несколько машин для текущего пользователя
         $car1 = Car::factory()->create(['user_id' => $this->user->id]);
         $car2 = Car::factory()->create(['user_id' => $this->user->id]);
-        
+
         $otherUser = User::factory()->create();
         $car3 = Car::factory()->create(['user_id' => $otherUser->id]);
         // Отправляем запрос на получение машин
@@ -140,7 +140,7 @@ class CarControllerTest extends TestCase
                     'year',
                     'mileage',
                     'color',
-                    
+
                 ],
             ],
         ]);
@@ -158,7 +158,7 @@ class CarControllerTest extends TestCase
     }
 
     public function test_can_show_car()
-        {
+    {
         // Создаем машину для текущего пользователя
         $car = Car::factory()->create(['user_id' => $this->user->id]);
         $car->load(['brand', 'model']);
@@ -191,7 +191,7 @@ class CarControllerTest extends TestCase
 
         // Проверяем структуру ответа
         $response->assertJson([
-            'error' => 'Unauthorized access to the car', 
+            'error' => 'Unauthorized access to the car',
         ]);
     }
 
@@ -208,92 +208,91 @@ class CarControllerTest extends TestCase
 
         // Проверяем структуру ответа
         $response->assertJson([
-            'error' => 'Unauthorized access to the car', 
+            'error' => 'Unauthorized access to the car',
         ]);
     }
 
     public function test_can_update_car()
-{
-    
-    $car = Car::factory()->create(['user_id' => $this->user->id]);
-    
-    // Подготовка заголовков и данных для обновления
+    {
 
-    $updatedData = [
-        'brand_id' => $car->brand_id,
-        'model_id' => $car->model_id,
-        'year' => 2021,
-        'mileage' => 40000,
-        'color' => 'Blue',
-    ];
+        $car = Car::factory()->create(['user_id' => $this->user->id]);
 
-    // Отправляем запрос на обновление
-    $response = $this->putJson("/api/v1/cars/{$car->id}", $updatedData);
+        // Подготовка заголовков и данных для обновления
 
-    // Проверка успешного обновления
-    $response->assertStatus(200)
-             ->assertJson([
+        $updatedData = [
+            'brand_id' => $car->brand_id,
+            'model_id' => $car->model_id,
+            'year' => 2021,
+            'mileage' => 40000,
+            'color' => 'Blue',
+        ];
+
+        // Отправляем запрос на обновление
+        $response = $this->putJson("/api/v1/cars/{$car->id}", $updatedData);
+
+        // Проверка успешного обновления
+        $response->assertStatus(200)
+            ->assertJson([
                 'message' => 'Car updated successfully',
-             ]);
+            ]);
 
-    // Проверка, что данные обновлены в базе
-    $this->assertDatabaseHas('cars', [
-        'id' => $car->id,
-        'year' => 2021,
-        'mileage' => 40000,
-        'color' => 'Blue',
-    ]);
-}
+        // Проверка, что данные обновлены в базе
+        $this->assertDatabaseHas('cars', [
+            'id' => $car->id,
+            'year' => 2021,
+            'mileage' => 40000,
+            'color' => 'Blue',
+        ]);
+    }
 
-public function test_update_car_fails_with_invalid_data()
-{
-    $car = Car::factory()->create(['user_id' => $this->user->id]);
+    public function test_update_car_fails_with_invalid_data()
+    {
+        $car = Car::factory()->create(['user_id' => $this->user->id]);
 
-    $invalidData = [
-        'brand_id' => 9999, // Не существует
-        'model_id' => $car->model_id,
-        'year' => 2021,
-        'mileage' => 40000,
-        'color' => 'Blue',
-    ];
+        $invalidData = [
+            'brand_id' => 9999, // Не существует
+            'model_id' => $car->model_id,
+            'year' => 2021,
+            'mileage' => 40000,
+            'color' => 'Blue',
+        ];
 
-    // Отправляем запрос на обновление
-    $response = $this->putJson("/api/v1/cars/{$car->id}", $invalidData);
+        // Отправляем запрос на обновление
+        $response = $this->putJson("/api/v1/cars/{$car->id}", $invalidData);
 
-    // Проверка, что ответ с ошибкой и правильный код статуса
-    $response->assertStatus(422)
-             ->assertJson([
-                 'message' => 'The selected brand id is invalid.',
-                 'errors' => [
-                     'brand_id' => ['The selected brand id is invalid.'],
-                 ],
-             ]);
-}
-public function test_can_delete_car()
-{
-    
-    $car = Car::factory()->create(['user_id' => $this->user->id]);
+        // Проверка, что ответ с ошибкой и правильный код статуса
+        $response->assertStatus(422)
+            ->assertJson([
+                'message' => 'The selected brand id is invalid.',
+                'errors' => [
+                    'brand_id' => ['The selected brand id is invalid.'],
+                ],
+            ]);
+    }
+    public function test_can_delete_car()
+    {
+
+        $car = Car::factory()->create(['user_id' => $this->user->id]);
 
 
-    // Отправляем запрос на удаление
-    $response = $this->deleteJson("/api/v1/cars/{$car->id}");
+        // Отправляем запрос на удаление
+        $response = $this->deleteJson("/api/v1/cars/{$car->id}");
 
-    // Проверка успешного удаления
-    $response->assertStatus(200)
-             ->assertJson(['message' => 'Car deleted successfully']);
+        // Проверка успешного удаления
+        $response->assertStatus(200)
+            ->assertJson(['message' => 'Car deleted successfully']);
 
-    // Проверка, что автомобиль удален из базы
-    $this->assertDatabaseMissing('cars', ['id' => $car->id]);
-}
+        // Проверка, что автомобиль удален из базы
+        $this->assertDatabaseMissing('cars', ['id' => $car->id]);
+    }
 
-public function test_delete_car_fails_when_not_found()
-{
-    // Отправляем запрос на удаление несуществующего автомобиля
-    $response = $this->deleteJson("/api/v1/cars/9999");
+    public function test_delete_car_fails_when_not_found()
+    {
+        // Отправляем запрос на удаление несуществующего автомобиля
+        $response = $this->deleteJson("/api/v1/cars/9999");
 
-    // Проверка, что ответ с ошибкой и правильный код статуса
-    $response->assertStatus(403)
-             ->assertJson(['error' => 'Unauthorized access to the car']);
-}
-
+        // Проверка, что ответ с ошибкой и правильный код статуса
+        $response->assertStatus(403)
+            ->assertJson(['error' => 'Unauthorized access to the car']);
+    }
 }

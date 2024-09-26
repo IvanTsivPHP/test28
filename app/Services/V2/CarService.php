@@ -10,20 +10,21 @@ use Illuminate\Support\Facades\Auth;
 
 class CarService
 {
-   
+
 
     public function __construct(
         protected CarRepositoryInterface $carRepository,
         protected CarModelRepositoryInterface $carModelRepository,
         protected BrandRepositoryInterface $brandRepository
-        ) {}
+    ) {}
 
     public function getUserCars()
     {
         return $this->carRepository->allByUser(Auth::id());
     }
 
-    private function formatData(array $data, CarModel $carModel) {
+    private function formatData(array $data, CarModel $carModel)
+    {
         return [
             'brand_id' => $carModel->brand_id,
             'model_id' => $carModel->id,
@@ -52,7 +53,7 @@ class CarService
     public function update(int $id, array $data)
     {
         $car = $this->carRepository->get($id);
-        if($car['user_id'] != Auth::id()) {
+        if ($car['user_id'] != Auth::id()) {
             throw new \Exception('Unauthorized access to the car');
         }
 

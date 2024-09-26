@@ -35,7 +35,7 @@ class CarService
     public function update(int $id, array $data)
     {
         $car = $this->carRepository->get($id);
-        if($car['user_id'] != Auth::id()) {
+        if ($car['user_id'] != Auth::id()) {
             throw new \Exception('Unauthorized access to the car');
         }
 

@@ -42,8 +42,7 @@ class CarController extends Controller
             return new CarResource($car);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 403);
-        }   
-       
+        }
     }
 
     public function update(CarRequest $request, $id): JsonResponse
@@ -54,7 +53,7 @@ class CarController extends Controller
             return response()->json(['message' => 'Car updated successfully']);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 403);
-        }   
+        }
     }
 
     public function destroy($id): JsonResponse
@@ -65,6 +64,6 @@ class CarController extends Controller
             return response()->json(['message' => 'Car deleted successfully']);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 403);
-        }   
+        }
     }
 }

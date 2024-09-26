@@ -22,7 +22,7 @@ class CarRequest extends FormRequest
     public function rules(): array
     {
         return [
-           'brand' => 'required|string|max:255',
+            'brand' => 'required|string|max:255',
             'model' => 'required|string|max:255',
             'year' => 'nullable|integer',
             'mileage' => 'nullable|integer',
